@@ -1,0 +1,65 @@
+---
+title: "Cost-Effectiveness Analysis of Diabetes Screening in Nairobi"
+author: "Philip Ngari Matano"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+This project evaluates whether implementing a preventive Type 2 Diabetes screening program in Nairobi is cost-effective compared to treating diabetes after diagnosis. The analysis uses simulated data based on public health cost assumptions.
+set.seed(2025)
+population_size <- 1000
+
+cost_A <- rnorm(population_size, mean = 1500, sd = 500)  # No screening
+qaly_A <- rnorm(population_size, mean = 5, sd = 1)
+
+cost_B <- rnorm(population_size, mean = 1200, sd = 400)  # With screening
+qaly_B <- rnorm(population_size, mean = 6, sd = 1)
+
+health_data <- data.frame(
+  cost_A = cost_A,
+  qaly_A = qaly_A,
+  cost_B = cost_B,
+  qaly_B = qaly_B
+)
+
+head(health_data)
+cer_A <- mean(health_data$cost_A) / mean(health_data$qaly_A)
+cer_B <- mean(health_data$cost_B) / mean(health_data$qaly_B)
+
+incremental_cost <- mean(health_data$cost_B) - mean(health_data$cost_A)
+incremental_qaly <- mean(health_data$qaly_B) - mean(health_data$qaly_A)
+icer <- incremental_cost / incremental_qaly
+
+data.frame(
+  CER_No_Screening = cer_A,
+  CER_Screening = cer_B,
+  ICER = icer
+)
+ggplot(health_data, aes(x = cost_A, y = qaly_A)) +
+  geom_point(color = "blue", alpha = 0.5) +
+  geom_point(aes(x = cost_B, y = qaly_B), color = "red", alpha = 0.5) +
+  labs(
+    title = "Cost-Effectiveness of Diabetes Screening",
+    subtitle = "Red: Screening | Blue: No Screening",
+    x = "Cost (KSh)",
+    y = "QALYs Gained"
+  ) +
+  theme_minimal()
+CER (Cost-Effectiveness Ratio): Measures the cost per QALY in each scenario.
+
+ICER (Incremental Cost-Effectiveness Ratio): Compares the additional cost per extra QALY gained by screening.
+
+If the ICER is below the threshold (e.g., 3x GDP per capita, approx. KSh 360,000), then the screening is cost-effective.
+This simplified simulation suggests that preventive screening for diabetes may improve health outcomes at a lower cost, thus being a potentially cost-effective intervention. Future work should include real data from MoH or NHIF, and more robust models (Markov, probabilistic sensitivity analysis, etc).
+ References
+WHO Kenya Country Health Profile
+
+Ministry of Health Kenya – National Diabetes Strategy
+
+Neumann PJ et al. Cost-Effectiveness in Health and Medicine (Oxford Univ Press)
